@@ -10,4 +10,5 @@ source "$BIN_DIR/utils"
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
+mypy -m test.all_tests
 python -m test.all_tests
