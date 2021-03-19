@@ -11,8 +11,8 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 set -e
-if [[ -x "./run_tests.sh" ]]; then
-  ./run_tests.sh
+if [[ -f "run_tests.sh" ]]; then
+  /bin/bash run_tests.sh
 else
   echo "run_tests.sh not found"
 fi
