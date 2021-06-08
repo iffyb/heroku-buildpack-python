@@ -19,8 +19,10 @@ RSpec.describe 'Pip support' do
       app.deploy do |app|
         expect(clean_output(app.output)).to match(Regexp.new(<<~REGEX))
           remote: -----> Python app detected
+          remote: -----> No Python version was specified. Using the buildpack default: python-#{DEFAULT_PYTHON_VERSION}
+          remote:        To use a different version, see: https://devcenter.heroku.com/articles/python-runtimes
           remote: -----> Installing python-#{DEFAULT_PYTHON_VERSION}
-          remote: -----> Installing pip 20.1.1, setuptools 47.1.1 and wheel 0.34.2
+          remote: -----> Installing pip 20.2.4, setuptools 47.1.1 and wheel 0.36.2
           remote: -----> Installing SQLite3
           remote: -----> Installing requirements with pip
           remote:        Collecting urllib3
@@ -32,8 +34,11 @@ RSpec.describe 'Pip support' do
         app.push!
         expect(clean_output(app.output)).to include(<<~OUTPUT)
           remote: -----> Python app detected
+          remote: -----> No Python version was specified. Using the same version as the last build: python-#{DEFAULT_PYTHON_VERSION}
+          remote:        To use a different version, see: https://devcenter.heroku.com/articles/python-runtimes
           remote: -----> No change in requirements detected, installing from cache
-          remote: -----> Installing pip 20.1.1, setuptools 47.1.1 and wheel 0.34.2
+          remote: -----> Using cached install of python-#{DEFAULT_PYTHON_VERSION}
+          remote: -----> Installing pip 20.2.4, setuptools 47.1.1 and wheel 0.36.2
           remote: -----> Installing SQLite3
           remote: -----> Installing requirements with pip
           remote: -----> Discovering process types
@@ -52,9 +57,11 @@ RSpec.describe 'Pip support' do
         app.push!
         expect(clean_output(app.output)).to match(Regexp.new(<<~REGEX))
           remote: -----> Python app detected
+          remote: -----> No Python version was specified. Using the same version as the last build: python-#{DEFAULT_PYTHON_VERSION}
+          remote:        To use a different version, see: https://devcenter.heroku.com/articles/python-runtimes
           remote: -----> Requirements file has been changed, clearing cached dependencies
           remote: -----> Installing python-#{DEFAULT_PYTHON_VERSION}
-          remote: -----> Installing pip 20.1.1, setuptools 47.1.1 and wheel 0.34.2
+          remote: -----> Installing pip 20.2.4, setuptools 47.1.1 and wheel 0.36.2
           remote: -----> Installing SQLite3
           remote: -----> Installing requirements with pip
           remote:        Collecting urllib3
@@ -114,18 +121,11 @@ RSpec.describe 'Pip support' do
     end
   end
 
-  context 'when using pysqlite and Python 2', stacks: %w[heroku-16 heroku-18] do
+  context 'when using pysqlite and Python 2', stacks: %w[heroku-18] do
     # This is split out from the requirements_compiled fixture, since the original
     # pysqlite package (as opposed to the newer pysqlite3) only supports Python 2.
     # This test has to be skipped on newer stacks where Python 2 is not available.
     let(:app) { Hatchet::Runner.new('spec/fixtures/requirements_pysqlite_python_2') }
-
-    include_examples 'installs successfully using pip'
-  end
-
-  context 'when using Airflow 1.10.2 with SLUGIFY_USES_TEXT_UNIDECODE set' do
-    let(:config) { { 'SLUGIFY_USES_TEXT_UNIDECODE' => 'yes' } }
-    let(:app) { Hatchet::Runner.new('spec/fixtures/requirements_airflow_1.10.2', config: config) }
 
     include_examples 'installs successfully using pip'
   end
